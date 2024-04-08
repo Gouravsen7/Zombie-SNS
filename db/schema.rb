@@ -11,10 +11,13 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.0].define(version: 2024_04_08_080427) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "items", force: :cascade do |t|
     t.string "item"
     t.integer "points"
-    t.integer "survivor_id"
+    t.bigint "survivor_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["survivor_id"], name: "index_items_on_survivor_id"
