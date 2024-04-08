@@ -1,33 +1,23 @@
 class SurvivorsController < ApplicationController
-	before_action :find_survivor, only: [:update, :destroy]
-	def index
-		survivor = Survivor.all
-		render json: survivor
-	end
+	before_action :find_survivor, only: :update
 
 	def create
 		survivor = Survivor.new(survivor_params)
 		if survivor.save
-			render json: survivor, status: 201
+			render json: {data: survivor, message: "successfully created"}, status: 201
 		else
       render json: {errors: survivor.errors.full_messages}, status: 422  
     end
 	end
 
 	def update
-		unless @survivor.infected != "false"
-			return render json: {errors: "not accesible"}, status: 422
-		end
+		return render json: {errors: "infected user"}, status: 422 unless @survivor.infected
 
-		@survivor.update(survivor_params)
-		if @survivor
+		if @survivor.update(survivor_params)
 			render json: {data: @survivor, message: "successfully updated"}, status: 200
 		else
 			render json: {errors: @survivor.errors.full_messages}, status: 422
 		end
-	end
-
-	def destroy
 	end
 
 	private
@@ -38,6 +28,6 @@ class SurvivorsController < ApplicationController
 	end
 
 	def survivor_params
-		params.require(:survivor).permit(:name, :age, :gender, :latitude, :longitude)
+		params.require(:survivor).permit(:name, :age, :gender, :latitude, :longitude, items_attributes: [:item, :points, :quantity])
 	end
 end
