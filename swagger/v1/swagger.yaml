@@ -1,0 +1,38 @@
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1
+paths: 
+  "/survivors":
+    post:
+      summary: Create survivors
+      tags:
+        - Survivors
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties: 
+                survivor:
+                  type: object
+                  properties: 
+                    name:
+                      type: string
+                    age:
+                      type: integer
+                    gender:
+                      type: string
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+      responses:
+        '200':
+          description: Successful operation
+servers:
+  - url: http://{defaultHost}
+    variables:
+      defaultHost:
+        default: localhost:3000
