@@ -9,13 +9,15 @@ class Survivor < ApplicationRecord
 	validates :longitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/}}
 	validate :check_items
 
+	scope :get_survivor, ->(name){ find_by(name: name) }
+
 	def check_items
-	  items.each do |inventory|
-	    water_exist = inventory.is_item_valid?('water')
-	    aid_exist = inventory.is_item_valid?('first aid')
-	    unless water_exist && aid_exist
-	  		errors.add(:item, 'water and first aid must exist') 
+	  items_hash = items.index_by(&:item)
+	  ['water', 'first aid'].each do |item_name|
+	    unless items_hash.key?(item_name)
+	      errors.add(:item, "#{item_name} must exist")
 	    end
 	  end
 	end
+
 end

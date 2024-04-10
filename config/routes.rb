@@ -4,5 +4,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "articles#index"
   resources :survivors
-  resources :items
+  resources :items do 
+  	get 'trade_items', on: :collection
+  end
 end

@@ -1,6 +1,13 @@
 class SurvivorsController < ApplicationController
 	before_action :find_survivor, only: :update
 
+	def index 
+		servivors = Survivor.all
+		render json: { message: "Servivors not found"}, status: 404  unless servivors
+       
+		render json: servivors, status: 201
+	end
+
 	def create
 		survivor = Survivor.new(survivor_params)
 		if survivor.save
