@@ -15,6 +15,7 @@ class Survivor < ApplicationRecord
   validates :longitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
   scope :infected_count, -> { where(infected: true).count.to_f }
   scope :non_infected_count, -> { where(infected: false).count.to_f }
+  validate :check_items
 
   def check_items
     items_hash = items.index_by(&:item)
@@ -47,22 +48,6 @@ class Survivor < ApplicationRecord
     end
   end
 
-  def self.infected_survivors(trade_to, trade_by)
-  	if trade_to&.infected && trade_by&.infected
-  		"Trade not possible: both servivors infected"
-  	else
-    	check_infected_survivor(trade_to, "trade_to") || check_infected_survivor(trade_by, "trade_by")
-    end
-  end
-
-  def self.is_trade_found(trade_to, trade_by, trade_by_name, trade_to_name)
-    unless trade_to && trade_by
-    	"Both Serrvivors not found"
-		else
-		  trade_found(trade_by, trade_by_name) || trade_found(trade_to, trade_to_name)
-		end
-	end
-
 	def self.check_trade_items(sender_items, receiver_items, sender, receiver)
 
     sender_db_items = sender.items.where(item: receiver_items.map { |inventory| inventory[:item] }).index_by(&:item)
@@ -77,28 +62,19 @@ class Survivor < ApplicationRecord
 
   private
 
-  def self.trade_found(survivor, name)
-  	"Survivor not found: #{name}" unless survivor
-  end
-
-  def self.check_infected_survivor(survivor, survivor_type)
-    "Trade not possible: #{survivor_type} survivor #{survivor&.name} is infected" if survivor&.infected
-  end
-
   def self.match_quantity_of_items(survivor_items, items)
     points = 0
     error_message = nil
  
     items.each do |inventory|
       item_points = survivor_items[inventory[:item]]
-      unless item_points.present? && item_points.quantity > inventory[:quantity]
+      unless item_points.present? && item_points.quantity >= inventory[:quantity]
        	error_message = "For the survivor, item #{inventory[:item]} or its quantity #{inventory[:quantity]} does not match, trade cannot proceed"
       	break
       else
         points += item_points.points * inventory[:quantity]
       end
     end
-
     error_message ? { error: error_message } : { points: points, error: error_message}
   end
 end

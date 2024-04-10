@@ -1,5 +1,5 @@
 class SurvivorSerializer < ActiveModel::Serializer
-  attributes :id, :name, :age, :latitude, :longitude, :gender, :infected
+  attributes :id, :user_name, :name, :age, :latitude, :longitude, :gender, :infected
 
   has_many :items
 end
