@@ -1,9 +1,23 @@
 require 'rails_helper'
 
 RSpec.describe SurvivorsController, type: :controller do
+  describe 'GET#index' do 
+    let(:survivor) { create(:survivor, items_attributes: [
+    { item: 'water', quantity: 3 , points: 4},
+    { item: 'first aid', quantity: 5 , points: 2},
+    ]) }
+
+    context 'for all non infected survivor' do
+      it 'should display all non infected survivor' do
+        get :index
+        expect(response).to have_http_status(200)
+      end
+    end
+  end
+
   describe 'POST #create' do
     context 'with valid parameters' do
-      let(:valid_params) { { survivor: attributes_for(:survivor) } }
+      let(:valid_params) { { survivor: attributes_for(:survivor, items_attributes: [{ item: 'water', quantity: 3 , points: 4},{ item: 'first aid', quantity: 5 , points: 2}])} }
 
       it 'creates a new survivor' do
         expect do
@@ -39,7 +53,10 @@ RSpec.describe SurvivorsController, type: :controller do
   end
 
   describe 'PATCH #update' do
-    let(:survivor) { create(:survivor) }
+    let(:survivor) { create(:survivor, items_attributes: [
+      { item: 'water', quantity: 3 , points: 4},
+      { item: 'first aid', quantity: 5 , points: 2},
+      ]) }
 
     context 'when survivor is infected' do
       before { survivor.update(infected: true) }

@@ -5,7 +5,7 @@ class SurvivorsController < ApplicationController
 		servivors = Survivor.non_infected
 		render json: { message: "Servivors not found"}, status: 404  unless servivors
        
-		render json: servivors, status: 201
+		render json: servivors, status: 200
 	end
 
   def create
@@ -33,7 +33,7 @@ class SurvivorsController < ApplicationController
                    	non_infected_survivors: Survivor.survivor_percentage(Survivor.non_infected_count).to_s+"%",
                    	resource_average_amount_per_survivor: Survivor.average_item_amounts,
                    	infected_survivor_lost_point: Survivor.total_points_lost_per_item 
-                  }
+                  }, status: 200
   end
 
   private

@@ -21,7 +21,7 @@ class Survivor < ApplicationRecord
   scope :non_infected_count, -> { non_infected.count.to_f }
  
   def check_items
-    items_hash = items.index_by(&:item)
+    items_hash = items.index_by { |item| item.item.downcase }
     ['water', 'first aid'].each do |item_name|
       errors.add(:item, "#{item_name} must exist") unless items_hash.key?(item_name)
     end

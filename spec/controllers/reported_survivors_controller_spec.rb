@@ -4,8 +4,8 @@ RSpec.describe ReportedSurvivorsController, type: :controller do
   describe 'POST #create' do
     let(:reported_by) do
       create(:survivor, items_attributes: [
-               { item: 'water', quantity: 3, points: 4 },
-               { item: 'first aid', quantity: 5, points: 2 }
+               { item: 'Water', quantity: 3, points: 4 },
+               { item: 'first Aid', quantity: 5, points: 2 }
              ])
     end
     let(:reported_to) do
