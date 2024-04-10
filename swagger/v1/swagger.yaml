@@ -12,6 +12,13 @@ paths:
         '200':
           description: Successful
   "/survivors":
+    get:
+      summary: List of non infected survivor
+      tags:
+        - Survivors
+      responses:
+        '200':
+          description: Successful
     post:
       summary: Create survivors
       tags:
@@ -122,6 +129,47 @@ paths:
           description: Unprocessable Entity - Invalid input data
         500:
           description: Internal Server Error - Something went wrong on the server 
+  "/items/trade_items":
+    post:
+      summary: Trade items between survivors
+      tags:
+        - Trade Items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trade_by:
+                  type: string
+                trade_to:
+                  type: string
+                trade_to_items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      item:
+                        type: string
+                      quantity:
+                        type: integer
+                trade_by_items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      item:
+                        type: string
+                      quantity:
+                        type: integer
+      responses:
+        200:
+          description: Trade successful
+        422:
+          description: Trade not possible due to points mismatch
+        404:
+          description: Survivor not found
 
 servers:
   - url: http://{defaultHost}

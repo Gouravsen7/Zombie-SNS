@@ -13,10 +13,13 @@ class Survivor < ApplicationRecord
   validates :user_name, presence: true, uniqueness: true
   validates :latitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
   validates :longitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
-  scope :infected_count, -> { where(infected: true).count.to_f }
-  scope :non_infected_count, -> { where(infected: false).count.to_f }
   validate :check_items
 
+  scope :non_infected, -> { where(infected: false) }
+  scope :infected, -> { where(infected: true) }
+  scope :infected_count, -> { infected.count.to_f }
+  scope :non_infected_count, -> { non_infected.count.to_f }
+ 
   def check_items
     items_hash = items.index_by(&:item)
     ['water', 'first aid'].each do |item_name|
@@ -30,7 +33,7 @@ class Survivor < ApplicationRecord
   end
 
   def self.total_points_lost_per_item
-    where(infected: true)
+    infected
       .joins(:items)
       .group('items.item')
       .sum('items.points * items.quantity')
@@ -39,7 +42,7 @@ class Survivor < ApplicationRecord
   def self.average_item_amounts
     total_survivors = non_infected_count
 
-    item_counts = where(infected: false)
+    item_counts = non_infected
                   .joins(:items)
                   .group('items.item')
                   .sum('items.quantity')

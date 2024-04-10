@@ -1,7 +1,7 @@
 class ItemsController < ApplicationController
-  before_action :parse_trade_items, only: :trade_items
   before_action :get_survivors, only: :trade_items
   before_action :check_infected_survivors, only: :trade_items
+  before_action :parse_trade_items, only: :trade_items
 
   def trade_items
     points = Survivor.check_trade_items(@trade_by_items, @trade_to_items, @trade_by, @trade_to)
@@ -28,9 +28,8 @@ class ItemsController < ApplicationController
   end
 
   def get_survivors
-    @trade_to = Survivor.find_by_name(params[:trade_to])
-    @trade_by = Survivor.find_by_name(params[:trade_by])
-
+    @trade_to = Survivor.find_by_user_name(params[:trade_to])
+    @trade_by = Survivor.find_by_user_name(params[:trade_by])
     render_error('Either one of them is not present') unless @trade_to && @trade_by
   end
 

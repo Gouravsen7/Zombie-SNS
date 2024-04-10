@@ -2,7 +2,7 @@ class SurvivorsController < ApplicationController
   before_action :find_survivor, only: :update
 
 	def index 
-		servivors = Survivor.all
+		servivors = Survivor.non_infected
 		render json: { message: "Servivors not found"}, status: 404  unless servivors
        
 		render json: servivors, status: 201

@@ -5,11 +5,9 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "articles#index"
-  resources :items do 
-  	get 'trade_items', on: :collection
-  end
-  resources :survivors do 
+  resources :survivors, expect: :destroy do 
   	get 'report', on: :collection
   end
   resources :reported_survivors, only: [:create]
+  post 'items/trade_items', to: "items#trade_items"
 end
