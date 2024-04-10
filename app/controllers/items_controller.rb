@@ -4,22 +4,24 @@ class ItemsController < ApplicationController
   before_action :check_infected_survivors, only: [:trade_items]
 
   def trade_items
-    begin
-      return unless trade_to_points = check_trade_items(@trade_by_items, @trade_to)
-      return unless trade_by_points = check_trade_items(@trade_to_items, @trade_by)
-      return render_error("Trade not possible: points do not match") unless trade_to_points == trade_by_points
-
-      Item.update_quantity(@trade_to_items, @trade_to, @trade_by)
-      Item.update_quantity(@trade_by_items, @trade_by, @trade_to)
-
-      render json: { message: "Trade Successfully" }
-    rescue ActionController::BadRequest => e
-      render json: ErrorSerializer.serialize(e.message), status: :unprocessable_entity
+    points = Survivor.check_trade_items(@trade_by_items, @trade_to_items, @trade_by, @trade_to)
+    if points[:receiver_points][:error] || points[:sender_points][:error]
+      return render_error(error: points[:receiver_points][:error] || points[:sender_points][:error])
     end
+
+    unless points[:sender_points] == points[:receiver_points]
+      return render json: { errors: 'Trade not possible: points does not match' }
+    end
+
+    Item.send_item_detail(@trade_to_items, @trade_to, @trade_by, @trade_by_items)
+
+    render json: { message: 'Trade Successfully' }, status: 200
+  rescue ActionController::BadRequest => e
+    render json: ErrorSerializer.serialize(e.message), status: :unprocessable_entity
   end
 
   private
-  
+
   def parse_trade_items
     @trade_by_items = parse_items(params[:trade_by_items])
     @trade_to_items = parse_items(params[:trade_to_items])
@@ -28,13 +30,12 @@ class ItemsController < ApplicationController
   def get_survivors
     @trade_to = Survivor.find_by_name(params[:trade_to])
     @trade_by = Survivor.find_by_name(params[:trade_by])
-		
-		Survivor.is_trade_found(trade_to, trade_by, trade_by_name, trade_to_name)
+
+    render_error('Either one of them is not present') if @trade_to || @trade_by
   end
 
   def check_infected_survivors
-    error_message = Survivor.infected_survivors(@trade_to, @trade_by)
-    render_error(error_message) if error_message
+    render_error('Either one of then is infected') if @trade_to.infected || @trade_by.infected
   end
 
   def check_trade_items(items, survivor)

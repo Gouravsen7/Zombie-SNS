@@ -41,7 +41,7 @@ class Survivor < ApplicationRecord
   end
 
   def self.average_item_amounts
-    total_survivors = where(infected: false).count.to_f
+    total_survivors = non_infected_count
 
     item_counts = where(infected: false)
                   .joins(:items)
@@ -53,28 +53,34 @@ class Survivor < ApplicationRecord
     end
   end
 
-  def self.infected_survivors(trade_to, trade_by)
-  	if trade_to&.infected && trade_by&.infected
-  		"Trade not possible: both servivors infected"
-  	else
-    	check_infected_survivor(trade_to, "trade_to") || check_infected_survivor(trade_by, "trade_by")
-    end
-  end
-  def self.is_trade_found(trade_to, trade_by, trade_by_name, trade_to_name)
-      unless trade_to && trade_by
-    	render_error("Both Serrvivors not found")
-		else
-		  is_trade_found(trade_by, trade_by_name) || is_trade_found(trade_to, trade_to_name)
-		end
+	def self.check_trade_items(sender_items, receiver_items, sender, receiver)
+
+    sender_db_items = sender.items.where(item: receiver_items.map { |inventory| inventory[:item] }).index_by(&:item)
+    receiver_db_items = receiver.items.where(item: sender_items.map { |inventory| inventory[:item] }).index_by(&:item)
+		sender_points = match_quantity_of_items(sender_db_items, receiver_items)
+		receiver_points = match_quantity_of_items(receiver_db_items, sender_items)
+		{
+			sender_points: sender_points,
+			receiver_points: receiver_points
+		}
   end
 
   private
 
-  def self.is_trade_found(survivor, name)
-  	render_error("Survivor not found: #{name}") unless survivor
-  end
+  def self.match_quantity_of_items(survivor_items, items)
+    points = 0
+    error_message = nil
+ 
+    items.each do |inventory|
+      item_points = survivor_items[inventory[:item]]
+      unless item_points.present? && item_points.quantity > inventory[:quantity]
+       	error_message = "For the survivor, item #{inventory[:item]} or its quantity #{inventory[:quantity]} does not match, trade cannot proceed"
+      	break
+      else
+        points += item_points.points * inventory[:quantity]
+      end
+    end
 
-  def self.check_infected_survivor(survivor, survivor_type)
-    "Trade not possible: #{survivor_type} survivor #{survivor&.name} is infected" if survivor&.infected
+    error_message ? { error: error_message } : { points: points, error: error_message}
   end
 end
