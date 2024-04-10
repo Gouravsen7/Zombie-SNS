@@ -20,12 +20,4 @@ class Item < ApplicationRecord
 	  end
 	end
 
-
-	# def self.update_item(items, survivor)
-	# 	items.each do |obj|
-	# 		res = survivor2.items.find_by(item: obj[:item])
-	# 		res.quantity -= obj[:quantity]
-	# 		res.save
-	# 	end
-	# end
 end
