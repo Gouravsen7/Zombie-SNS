@@ -28,8 +28,7 @@ class ItemsController < ApplicationController
   end
 
   def get_survivors
-    @trade_to = Survivor.find_by_name(params[:trade_to])
-    @trade_by = Survivor.find_by_name(params[:trade_by])
+    @trade_by = Survivor.find_by_user_name(params[:trade_by])
 		
 		error_messages = Survivor.is_trade_found(@trade_to, @trade_by, params[:trade_by], params[:trade_to])
 		render_error(error_messages) if error_messages

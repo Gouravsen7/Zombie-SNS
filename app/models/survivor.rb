@@ -9,8 +9,8 @@ class Survivor < ApplicationRecord
   accepts_nested_attributes_for :items
 
   enum gender: %i[female male other]
-  validates :name, presence: true, uniqueness: true
-  validates :age, presence: true, numericality: true
+  validates :name, :age, presence: true
+  validates :user_name, presence: true, uniqueness: true
   validates :latitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
   validates :longitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
   scope :infected_count, -> { where(infected: true).count.to_f }
@@ -21,10 +21,6 @@ class Survivor < ApplicationRecord
     ['water', 'first aid'].each do |item_name|
       errors.add(:item, "#{item_name} must exist") unless items_hash.key?(item_name)
     end
-  end
-
-  def self.find_by_name(name)
-  	find_by(name: name)
   end
 
   def self.survivor_percentage(survivor_count)
