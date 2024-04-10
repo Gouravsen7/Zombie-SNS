@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory(:survivor) do
-    name { Faker::Internet.user_name }
+    user_name { Faker::Internet.user_name }
+    name { 'steve' }
     age { 22 }
     gender { 'female' }
     latitude { Faker::Address.latitude }
@@ -19,4 +20,5 @@ FactoryBot.define do
   	points { 14 }
   	quantity { 2 }
   end
+
 end

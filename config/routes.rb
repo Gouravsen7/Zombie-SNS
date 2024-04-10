@@ -5,7 +5,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "articles#index"
-  resources :survivors, expect: :destroy do 
+  resources :survivors do 
   	get 'report', on: :collection
   end
   resources :reported_survivors, only: [:create]

@@ -3,8 +3,18 @@
 require 'rails_helper'
 
 RSpec.describe ReportedSurvivor, type: :model do
-  let(:reported_by_survivor) { create(:survivor) }
-  let(:reported_to_survivor) { create(:survivor) }
+  let(:reported_by_survivor) do
+    create(:survivor, items_attributes: [
+             { item: 'Water', quantity: 3, points: 4 },
+             { item: 'First aid', quantity: 5, points: 2 }
+           ])
+  end
+  let(:reported_to_survivor) do
+    create(:survivor, items_attributes: [
+             { item: 'Water', quantity: 3, points: 4 },
+             { item: 'First aid', quantity: 5, points: 2 }
+           ])
+  end
 
   describe 'validations' do
     it {
