@@ -2,7 +2,7 @@ class SurvivorsController < ApplicationController
   before_action :find_survivor, only: :update
 
 	def index 
-		servivors = Survivor.all
+		servivors = Survivor.non_infected
 		render json: { message: "Servivors not found"}, status: 404  unless servivors
        
 		render json: servivors, status: 201
@@ -44,7 +44,7 @@ class SurvivorsController < ApplicationController
   end
 
   def survivor_params
-    params.require(:survivor).permit(:name, :age, :gender, :latitude, :longitude,
+    params.require(:survivor).permit(:user_name, :name, :age, :gender, :latitude, :longitude,
                                      items_attributes: %i[item points quantity])
   end
 end

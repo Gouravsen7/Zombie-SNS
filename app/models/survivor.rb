@@ -13,9 +13,13 @@ class Survivor < ApplicationRecord
   validates :user_name, presence: true, uniqueness: true
   validates :latitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
   validates :longitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
-  scope :infected_count, -> { where(infected: true).count.to_f }
-  scope :non_infected_count, -> { where(infected: false).count.to_f }
+  validate :check_items
 
+  scope :non_infected, -> { where(infected: false) }
+  scope :infected, -> { where(infected: true) }
+  scope :infected_count, -> { infected.count.to_f }
+  scope :non_infected_count, -> { non_infected.count.to_f }
+ 
   def check_items
     items_hash = items.index_by(&:item)
     ['water', 'first aid'].each do |item_name|
@@ -29,7 +33,7 @@ class Survivor < ApplicationRecord
   end
 
   def self.total_points_lost_per_item
-    where(infected: true)
+    infected
       .joins(:items)
       .group('items.item')
       .sum('items.points * items.quantity')
@@ -38,7 +42,7 @@ class Survivor < ApplicationRecord
   def self.average_item_amounts
     total_survivors = non_infected_count
 
-    item_counts = where(infected: false)
+    item_counts = non_infected
                   .joins(:items)
                   .group('items.item')
                   .sum('items.quantity')
@@ -46,22 +50,6 @@ class Survivor < ApplicationRecord
       (total_amount / total_survivors).round(2)
     end
   end
-
-  def self.infected_survivors(trade_to, trade_by)
-  	if trade_to&.infected && trade_by&.infected
-  		"Trade not possible: both servivors infected"
-  	else
-    	check_infected_survivor(trade_to, "trade_to") || check_infected_survivor(trade_by, "trade_by")
-    end
-  end
-
-  def self.is_trade_found(trade_to, trade_by, trade_by_name, trade_to_name)
-    unless trade_to && trade_by
-    	"Both Serrvivors not found"
-		else
-		  trade_found(trade_by, trade_by_name) || trade_found(trade_to, trade_to_name)
-		end
-	end
 
 	def self.check_trade_items(sender_items, receiver_items, sender, receiver)
 
@@ -77,28 +65,19 @@ class Survivor < ApplicationRecord
 
   private
 
-  def self.trade_found(survivor, name)
-  	"Survivor not found: #{name}" unless survivor
-  end
-
-  def self.check_infected_survivor(survivor, survivor_type)
-    "Trade not possible: #{survivor_type} survivor #{survivor&.name} is infected" if survivor&.infected
-  end
-
   def self.match_quantity_of_items(survivor_items, items)
     points = 0
     error_message = nil
  
     items.each do |inventory|
       item_points = survivor_items[inventory[:item]]
-      unless item_points.present? && item_points.quantity > inventory[:quantity]
+      unless item_points.present? && item_points.quantity >= inventory[:quantity]
        	error_message = "For the survivor, item #{inventory[:item]} or its quantity #{inventory[:quantity]} does not match, trade cannot proceed"
       	break
       else
         points += item_points.points * inventory[:quantity]
       end
     end
-
     error_message ? { error: error_message } : { points: points, error: error_message}
   end
 end

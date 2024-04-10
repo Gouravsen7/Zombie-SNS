@@ -12,6 +12,13 @@ paths:
         '200':
           description: Successful
   "/survivors":
+    get:
+      summary: List of non infected survivor
+      tags:
+        - Survivors
+      responses:
+        '200':
+          description: Successful
     post:
       summary: Create survivors
       tags:
@@ -27,6 +34,8 @@ paths:
                   type: object
                   properties: 
                     name:
+                      type: string
+                    user_name:
                       type: string
                     age:
                       type: integer
