@@ -1,6 +1,5 @@
 FactoryBot.define do
   factory(:survivor) do
-    user_name { Faker::Internet.user_name }
     name { 'steve' }
     age { 22 }
     gender { 'female' }

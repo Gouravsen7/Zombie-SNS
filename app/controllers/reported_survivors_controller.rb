@@ -1,6 +1,4 @@
 class ReportedSurvivorsController < ApplicationController
-  include ResourceRenderer
-
   def create
     report = ReportedSurvivor.new(reported_survivors_params)
     if report.save

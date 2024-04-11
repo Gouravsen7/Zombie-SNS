@@ -28,7 +28,7 @@ RSpec.describe SurvivorsController, type: :controller do
 
       it 'returns a success response' do
         post :create, params: valid_params
-        expect(response).to have_http_status(:created)
+        expect(response).to have_http_status(200)
       end
     end
 
@@ -43,7 +43,7 @@ RSpec.describe SurvivorsController, type: :controller do
 
       it 'returns an unprocessable entity response' do
         post :create, params: invalid_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["status"]).to eq(422)
       end
 
       it 'returns error messages' do
@@ -64,8 +64,8 @@ RSpec.describe SurvivorsController, type: :controller do
 
       it 'returns an unprocessable entity response' do
         patch :update, params: { id: survivor.id, survivor: { name: 'Updated Name' } }
-        expect(response).to have_http_status(422)
-        expect(JSON.parse(response.body)['errors']).to eq('infected user')
+        expect(JSON.parse(response.body)["status"]).to eq(422)
+        expect(JSON.parse(response.body)['errors']).to eq("survivor is infected, So you can not update!")
       end
     end
 
@@ -73,7 +73,7 @@ RSpec.describe SurvivorsController, type: :controller do
       it 'updates the survivor' do
         patch :update, params: { id: survivor.id, survivor: { name: 'Updated Name' } }
         expect(response).to have_http_status(200)
-        expect(JSON.parse(response.body)['data']['name']).to eq('Updated Name')
+        expect(JSON.parse(response.body)["data"]["Survivor"]["name"]).to eq('Updated Name')
       end
 
       it 'returns a success response' do
@@ -85,7 +85,7 @@ RSpec.describe SurvivorsController, type: :controller do
     context 'when survivor is not found' do
       it 'returns a not found response' do
         patch :update, params: { id: 'invalid_id', survivor: { name: 'Updated Name' } }
-        expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)["status"]).to eq(404)
       end
 
       it 'returns error message' do
@@ -102,7 +102,7 @@ RSpec.describe SurvivorsController, type: :controller do
     context 'survivor report' do
       it 'retrun report' do
         get :report
-        expect(JSON.parse(response.body)['messages']).to eq('Report Generated')
+        expect(JSON.parse(response.body)["data"]["resources"]["messages"]).to eq('Report Generated')
       end
     end
   end

@@ -25,7 +25,7 @@ RSpec.describe ReportedSurvivorsController, type: :controller do
 
       it 'returns a success response' do
         post :create, params: valid_params
-        expect(response).to have_http_status(:created)
+       expect(JSON.parse(response.body)["status"]).to eq(200)
       end
     end
 
@@ -40,7 +40,7 @@ RSpec.describe ReportedSurvivorsController, type: :controller do
 
       it 'returns an error response' do
         post :create, params: invalid_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["status"]).to eq(422)
       end
     end
   end

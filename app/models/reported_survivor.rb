@@ -11,7 +11,7 @@ class ReportedSurvivor < ApplicationRecord
   private
 
   def is_reported_survivor_infected
-    reported_to_survivor.update(infected: true) if ReportedSurvivor.where(reported_to:).count >= 5
+    reported_to_survivor.update(infected: true) if ReportedSurvivor.where(reported_to: reported_to).count >= 5
   end
 
   def different_reporter_and_reported_survivor

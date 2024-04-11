@@ -1,43 +1,28 @@
 # frozen_string_literal: true
 
 class ItemsController < ApplicationController
-  include ResourceRenderer
-
   before_action :survivors_present, only: :trade_items
   before_action :check_infected_survivors, only: :trade_items
-  before_action :parse_trade_items, only: :trade_items
 
   def trade_items
-    points = Survivor.check_trade_items(@trade_by_items, @trade_to_items, @trade_by, @trade_to)
-    if points[:receiver_points][:error] || points[:sender_points][:error]
-      return render_error(error: points[:receiver_points][:error] || points[:sender_points][:error])
+  	trade_result = TradeItems.new(@trade_by, @trade_to, params).match_item_points
+  	unless trade_result[:error_message].nil?
+    	render_unprocessable_entity(trade_result[:error_message])
+    else
+    	render_success_response(
+      	resources: { trade_to: single_serializer(@trade_to, SurvivorSerializer),
+        	           trade_by: single_serializer(@trade_to,
+          	                                     SurvivorSerializer) }, message: 'Trade Successfully'
+    	)
     end
-
-    unless points[:sender_points] == points[:receiver_points]
-      return render json: { errors: 'Trade not possible: points does not match' }
-    end
-
-    Item.send_item_detail(@trade_to_items, @trade_to, @trade_by, @trade_by_items)
-
-    render_success_response(
-      resources: { trade_to: single_serializer(@trade_to, SurvivorSerializer),
-                   trade_by: single_serializer(@trade_to,
-                                               SurvivorSerializer) }, message: 'Trade Successfully'
-    )
-  rescue ActionController::BadRequest => e
-    render_unprocessable_entity(e.message)
   end
 
   private
 
-  def parse_trade_items
-    @trade_by_items = parse_items(params[:trade_by_items])
-    @trade_to_items = parse_items(params[:trade_to_items])
-  end
 
   def survivors_present
-    @trade_to = Survivor.find_by_user_name(params[:trade_to])
-    @trade_by = Survivor.find_by_user_name(params[:trade_by])
+    @trade_to = Survivor.find_by_id(params[:trade_to])
+    @trade_by = Survivor.find_by_id(params[:trade_by])
     render_unprocessable_entity('Either one of them is not present') unless @trade_to && @trade_to
   end
 

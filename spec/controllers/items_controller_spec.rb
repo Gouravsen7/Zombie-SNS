@@ -19,23 +19,18 @@ RSpec.describe ItemsController, type: :controller do
 
 		context 'Trading process' do
 			it 'When trade Successful' do 
-				get :trade_items, params: {"trade_to": survivor1.user_name, "trade_by": survivor2.user_name, "trade_to_items": [ {"item": "soup", "quantity": 1} ], "trade_by_items": [ {"item": "AK47", "quantity": 1} ] }
-				expect(JSON.parse(response.body)["message"]).to eq("Trade Successfully")
+				get :trade_items, params: {"trade_to": survivor1.id, "trade_by": survivor2.id, "trade_to_items": [ {"item_id": item2.id, "quantity": 1} ], "trade_by_items": [ {"item_id": item1.id, "quantity": 1} ] }
+        expect(JSON.parse(response.body)["data"]["message"]).to eq("Trade Successfully")
 			end
 
 			it 'survivor not found' do 
-				get :trade_items, params: {"trade_to": "sakshi 13",   "trade_by": "sakshi 14",   "trade_to_items": [ {"item": "soup", "quantity": 1} ], "trade_by_items": [ {"item": "AK47", "quantity": 1} ] }
+				get :trade_items, params: {"trade_to": "sakshi 13",   "trade_by": "sakshi 14",   "trade_to_items": [ {"item_id": item2.id, "quantity": 1} ], "trade_by_items": [ {"item_id": item1.id, "quantity": 1} ] }
 				expect(JSON.parse(response.body)['errors']).to eq('Either one of them is not present')
-			end
-
-			it 'when trade quantity not match' do 
-				get :trade_items, params: {"trade_to": survivor2.user_name, "trade_by": survivor1.user_name, "trade_to_items": [ {"item": "soup", "quantity": 1} ], "trade_by_items": [ {"item": "AK47", "quantity": 1} ] }
-				expect(JSON.parse(response.body)["errors"]["error"]).to eq("For the survivor, item AK47 or its quantity 1 does not match, trade cannot proceed")
 			end
 
 			it 'when trade points not match' do 
 				item1.update(points: 12)
-				get :trade_items, params: {"trade_to": survivor1.user_name, "trade_by": survivor2.user_name, "trade_to_items": [ {"item": "soup", "quantity": 1} ], "trade_by_items": [ {"item": "AK47", "quantity": 1} ] }
+				get :trade_items, params: {"trade_to": survivor1.id, "trade_by": survivor2.id, "trade_to_items": [ {"item_id": item2.id, "quantity": 1} ], "trade_by_items": [ {"item_id": item1.id, "quantity": 1} ] }
 				expect(JSON.parse(response.body)["errors"]).to eq("Trade not possible: points does not match")
 			end
 

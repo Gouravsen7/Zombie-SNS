@@ -1,6 +1,5 @@
 class SurvivorsController < ApplicationController
-  include ResourceRenderer
-  before_action :find_survivor, only: :update
+  before_action :find_survivor, :check_infected, only: :update
 
   def index
     servivors = Survivor.non_infected
@@ -44,11 +43,15 @@ class SurvivorsController < ApplicationController
 
   def find_survivor
     @survivor = Survivor.find_by(id: params[:id])
-    render json: { errors: 'survivor not found' }, status: :not_found unless @survivor
+    render_unprocessable_entity('survivor not found', 404) unless @survivor
+  end
+
+  def check_infected
+    render_unprocessable_entity('survivor is infected, So you can not update!') if @survivor.infected
   end
 
   def survivor_params
-    params.require(:survivor).permit(:user_name, :name, :age, :gender, :latitude, :longitude,
+    params.require(:survivor).permit(:name, :age, :gender, :latitude, :longitude,
                                      items_attributes: %i[item points quantity])
   end
 end
