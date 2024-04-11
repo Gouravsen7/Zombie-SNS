@@ -1,5 +1,9 @@
+# frozen_string_literal: true
+
 class ItemsController < ApplicationController
-  before_action :get_survivors, only: :trade_items
+  include ResourceRenderer
+
+  before_action :survivors_present, only: :trade_items
   before_action :check_infected_survivors, only: :trade_items
   before_action :parse_trade_items, only: :trade_items
 
@@ -15,9 +19,13 @@ class ItemsController < ApplicationController
 
     Item.send_item_detail(@trade_to_items, @trade_to, @trade_by, @trade_by_items)
 
-    render json: { message: 'Trade Successfully' }, status: 200
+    render_success_response(
+      resources: { trade_to: single_serializer(@trade_to, SurvivorSerializer),
+                   trade_by: single_serializer(@trade_to,
+                                               SurvivorSerializer) }, message: 'Trade Successfully'
+    )
   rescue ActionController::BadRequest => e
-    render json: ErrorSerializer.serialize(e.message), status: :unprocessable_entity
+    render_unprocessable_entity(e.message)
   end
 
   private
@@ -27,13 +35,15 @@ class ItemsController < ApplicationController
     @trade_to_items = parse_items(params[:trade_to_items])
   end
 
-  def get_survivors
+  def survivors_present
     @trade_to = Survivor.find_by_user_name(params[:trade_to])
     @trade_by = Survivor.find_by_user_name(params[:trade_by])
-    render_error('Either one of them is not present') unless @trade_to && @trade_by
+    render_unprocessable_entity('Either one of them is not present') unless @trade_to && @trade_to
   end
 
   def check_infected_survivors
-    render_error('Either one of them is infected') if @trade_to.infected && @trade_by.infected
+    return unless @trade_to.infected && @trade_by.infected
+
+    render_unprocessable_entity('Either one of them is infected')
   end
 end

@@ -3,9 +3,10 @@ require 'rails_helper'
 RSpec.describe SurvivorsController, type: :controller do
   describe 'GET#index' do 
     let(:survivor) { create(:survivor, items_attributes: [
-    { item: 'water', quantity: 3 , points: 4},
-    { item: 'first aid', quantity: 5 , points: 2},
-    ]) }
+        { item: 'water', quantity: 3 , points: 4},
+        { item: 'first aid', quantity: 5 , points: 2},
+      ]) 
+    }
 
     context 'for all non infected survivor' do
       it 'should display all non infected survivor' do

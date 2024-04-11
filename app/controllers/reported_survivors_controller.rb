@@ -1,9 +1,13 @@
 class ReportedSurvivorsController < ApplicationController
+  include ResourceRenderer
+
   def create
     report = ReportedSurvivor.new(reported_survivors_params)
-    return render json: { errors: report.errors.full_messages }, status: 422 unless report.save
-
-    render json: { report:, message: 'Survivor Reported sucessfully' }, status: 201
+    if report.save
+      render_success_response(report, 'Survivor Reported sucessfully')
+    else
+      render_unprocessable_entity_response(report, 'Validation failed')
+    end
   end
 
   private

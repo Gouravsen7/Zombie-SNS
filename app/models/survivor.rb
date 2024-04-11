@@ -19,13 +19,7 @@ class Survivor < ApplicationRecord
   scope :infected, -> { where(infected: true) }
   scope :infected_count, -> { infected.count.to_f }
   scope :non_infected_count, -> { non_infected.count.to_f }
- 
-  def check_items
-    items_hash = items.index_by { |item| item.item.downcase }
-    ['water', 'first aid'].each do |item_name|
-      errors.add(:item, "#{item_name} must exist") unless items_hash.key?(item_name)
-    end
-  end
+  validate :is_infected
 
   def self.survivor_percentage(survivor_count)
     total_survivors = count.to_f
@@ -51,33 +45,43 @@ class Survivor < ApplicationRecord
     end
   end
 
-	def self.check_trade_items(sender_items, receiver_items, sender, receiver)
-
+  def self.check_trade_items(sender_items, receiver_items, sender, receiver)
     sender_db_items = sender.items.where(item: receiver_items.map { |inventory| inventory[:item] }).index_by(&:item)
     receiver_db_items = receiver.items.where(item: sender_items.map { |inventory| inventory[:item] }).index_by(&:item)
-		sender_points = match_quantity_of_items(sender_db_items, receiver_items)
-		receiver_points = match_quantity_of_items(receiver_db_items, sender_items)
-		{
-			sender_points: sender_points,
-			receiver_points: receiver_points
-		}
+    sender_points = match_quantity_of_items(sender_db_items, receiver_items)
+    receiver_points = match_quantity_of_items(receiver_db_items, sender_items)
+    {
+      sender_points:,
+      receiver_points:
+    }
   end
 
   private
 
+  def check_items
+    items_hash = items.index_by { |item| item.item.downcase }
+    ['water', 'first aid'].each do |item_name|
+      errors.add(:item, "#{item_name} must exist") unless items_hash.key?(item_name)
+    end
+  end
+
+  def is_infected
+    errors.add(:user_name, 'is infected') if infected
+  end
+
   def self.match_quantity_of_items(survivor_items, items)
     points = 0
     error_message = nil
- 
+
     items.each do |inventory|
       item_points = survivor_items[inventory[:item]]
-      unless item_points.present? && item_points.quantity >= inventory[:quantity]
-       	error_message = "For the survivor, item #{inventory[:item]} or its quantity #{inventory[:quantity]} does not match, trade cannot proceed"
-      	break
-      else
+      if item_points.present? && item_points.quantity >= inventory[:quantity]
         points += item_points.points * inventory[:quantity]
+      else
+        error_message = "For the survivor, item #{inventory[:item]} or its quantity #{inventory[:quantity]} does not match, trade cannot proceed"
+        break
       end
     end
-    error_message ? { error: error_message } : { points: points, error: error_message}
+    error_message ? { error: error_message } : { points:, error: error_message }
   end
 end

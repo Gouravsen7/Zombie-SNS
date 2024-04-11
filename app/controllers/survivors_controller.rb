@@ -1,39 +1,43 @@
 class SurvivorsController < ApplicationController
+  include ResourceRenderer
   before_action :find_survivor, only: :update
 
-	def index 
-		servivors = Survivor.non_infected
-		render json: { message: "Servivors not found"}, status: 404  unless servivors
-       
-		render json: servivors, status: 200
-	end
+  def index
+    servivors = Survivor.non_infected
+    render_success_response({
+                              Survivor: array_serializer.new(servivors, message: 'Survivors found successfully',
+                                                                        serializer: SurvivorSerializer, action: :index)
+                            })
+  end
 
   def create
     survivor = Survivor.new(survivor_params)
     if survivor.save
-      render json: { data: SurvivorSerializer.new(survivor), message: 'successfully created' }, status: 201
+      render_success_response({
+                                Survivor: single_serializer(survivor, SurvivorSerializer)
+                              }, 'Survivor created sucessfully')
     else
-      render json: { errors: survivor.errors.full_messages }, status: 422
+      render_unprocessable_entity_response(survivor, 'Validation failed')
     end
   end
 
   def update
-    return render json: { errors: 'infected user' }, status: 422 if @survivor.infected
-
     if @survivor.update(survivor_params)
-      render json: { data: SurvivorSerializer.new(@survivor), message: 'successfully updated' }, status: 200
+      render_success_response({
+                                Survivor: single_serializer(@survivor, SurvivorSerializer)
+                              }, 'Survivor successfully updated')
     else
-      render json: { errors: @survivor.errors.full_messages }, status: 422
+      render_unprocessable_entity_response(@survivor, 'Validation failed')
     end
   end
 
   def report
-    render json: {	messages: 'Report Generated',
-                   	infected_survivours: Survivor.survivor_percentage(Survivor.infected_count).to_s+"%" ,
-                   	non_infected_survivors: Survivor.survivor_percentage(Survivor.non_infected_count).to_s+"%",
-                   	resource_average_amount_per_survivor: Survivor.average_item_amounts,
-                   	infected_survivor_lost_point: Survivor.total_points_lost_per_item 
-                  }, status: 200
+    data = { messages: 'Report Generated',
+             infected_survivours: Survivor.survivor_percentage(Survivor.infected_count).to_s + '%',
+             non_infected_survivors: Survivor.survivor_percentage(Survivor.non_infected_count).to_s + '%',
+             resource_average_amount_per_survivor: Survivor.average_item_amounts,
+             infected_survivor_lost_point: Survivor.total_points_lost_per_item }
+    render_success_response(resources: data, message: 'Report generated successfully')
   end
 
   private
