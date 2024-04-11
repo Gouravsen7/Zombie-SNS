@@ -21,8 +21,9 @@ class Item < ApplicationRecord
 
 	    res = survivor2.items.find_by(item: item_params[:item])
 			res.quantity -= item_params[:quantity]
-			res.quantity <= 0 ? res.destroy : res.save!	
-			if res.item == "water" || res.item == "first aid"
+			res.quantity <= 0 ? res.destroy : res.save!
+			item = res.item.downcase
+			if item == "water" || item == "first aid"
 			  res.quantity <= 0 ? survivor2.destroy : true
 			end
 	  end
