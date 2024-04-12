@@ -53,7 +53,6 @@ class Survivor < ApplicationRecord
   def trade_item(item, survior)
     survior.items.find_or_create_by(item: item.item).update(quantity: item.quantity + item.cache_selling_quantity)
     items.find_by(item: item.item).update(quantity: item.quantity - item.cache_selling_quantity)
-    debugger
     errors.any? ? errors : true
   end
 
