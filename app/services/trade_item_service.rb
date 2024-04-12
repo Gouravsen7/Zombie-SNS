@@ -16,7 +16,7 @@ class TradeItemService < ApplicationService
   private
 
   def check_dead
-    (sender.dead? || receiver.dead?) && errors.add(:message, 'Trade not possible traders are dead') 
+    (sender.dead? || receiver.dead?) && errors.add(:message, 'Trade not possible traders are dead')
   end
 
   def match_traders_points
@@ -43,16 +43,19 @@ class TradeItemService < ApplicationService
   end
 
   def trading
-   result = ActiveRecord::Base.transaction do
-      sender.cache_trading_items.each do |item|
-        sender.trade_item(item, receiver)
-      end
+  	begin
+	   	ActiveRecord::Base.transaction do
+	      sender.cache_trading_items.each do |item|
+	        sender.trade_item(item, receiver)
+	      end
 
-      receiver.cache_trading_items.each do |item|
-        receiver.trade_item(item, sender)
-      end
-    end
-    debugger
+	      receiver.cache_trading_items.each do |item|
+	        receiver.trade_item(item, sender)
+	      end
+	    end
+	  rescue ActiveRecord::StatementInvalid => e
+	  	errors.add(:error, "Trader can not perform trading because quantity item not sufficient")
+	  end
   end
 
   def raw_query_by_items(query_items)

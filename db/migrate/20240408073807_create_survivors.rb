@@ -7,7 +7,7 @@ class CreateSurvivors < ActiveRecord::Migration[7.0]
     	t.decimal :latitude
     	t.decimal :longitude
     	t.boolean :infected, default: false
-      
+
       t.timestamps
     end
   end
