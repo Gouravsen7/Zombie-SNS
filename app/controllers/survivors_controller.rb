@@ -52,6 +52,6 @@ class SurvivorsController < ApplicationController
 
   def survivor_params
     params.require(:survivor).permit(:name, :age, :gender, :latitude, :longitude,
-                                     items_attributes: %i[item points quantity])
+                                     items_attributes: %i[item quantity])
   end
 end

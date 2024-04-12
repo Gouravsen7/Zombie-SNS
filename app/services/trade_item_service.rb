@@ -22,8 +22,7 @@ class TradeItemService < ApplicationService
   def match_traders_points
     sender_points = calculate_point(@sender, @receiver_items)
     receiver_points = calculate_point(@receiver, @sender_items)
-
-    return errors.add(:points, 'Trade not possible: points does not match') unless sender_points&.eql?(receiver_points)
+    return errors.add(:points, 'Trade not possible: points does not match') unless sender_points > 0 && sender_points&.eql?(receiver_points)
 
     trading
   end
