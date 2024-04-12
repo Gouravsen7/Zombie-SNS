@@ -5,15 +5,15 @@ class ItemsController < ApplicationController
   before_action :check_infected_survivors, only: :trade_items
 
   def trade_items
-  	trade_result = TradeItems.new(@trade_by, @trade_to, params).match_item_points
-  	unless trade_result[:error_message].nil?
-    	render_unprocessable_entity(trade_result[:error_message])
-    else
+  	trade_result = TradeItemService.call(@trade_by, @trade_to, params)
+  	if trade_result.success?
     	render_success_response(
       	resources: { trade_to: single_serializer(@trade_to, SurvivorSerializer),
-        	           trade_by: single_serializer(@trade_to,
+        	           trade_by: single_serializer(@trade_by,
           	                                     SurvivorSerializer) }, message: 'Trade Successfully'
     	)
+    else
+    	render_unprocessable_entity(trade_result.errors)
     end
   end
 
@@ -27,8 +27,6 @@ class ItemsController < ApplicationController
   end
 
   def check_infected_survivors
-    return unless @trade_to.infected && @trade_by.infected
-
-    render_unprocessable_entity('Either one of them is infected')
+    render_unprocessable_entity('Either one of them is infected') if @trade_to.infected || @trade_by.infected
   end
 end

@@ -1,3 +1,5 @@
+require_relative '../../lib/errors'
+
 class ApplicationService
   class << self
     def call(*arg)

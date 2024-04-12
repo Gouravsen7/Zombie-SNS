@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Survivor < ApplicationRecord
+	attr_accessor :cache_trading_items
+
   has_many :items, dependent: :destroy
   has_many :reported_survivors_as_reported_by, class_name: 'ReportedSurvivor', foreign_key: 'reported_by',
                                                dependent: :destroy
@@ -43,11 +45,23 @@ class Survivor < ApplicationRecord
     end
   end
 
+  def dead?
+  	items.essentials.any?
+  end
+
+  
+  def trade_item(item, survior)
+    survior.items.find_or_create_by(item: item.item).update(quantity: item.quantity + item.cache_selling_quantity)
+    items.find_by(item: item.item).update(quantity: item.quantity - item.cache_selling_quantity)
+    debugger
+    errors.any? ? errors : true
+  end
+
   private
 
   def check_items
     items_hash = items.index_by { |item| item.item.downcase }
-    ['water', 'first aid'].each do |item_name|
+    BASIC_ITEMS_NAME.each do |item_name|
       errors.add(:item, "#{item_name} must exist") unless items_hash.key?(item_name)
     end
   end
