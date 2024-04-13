@@ -14,12 +14,17 @@ class Survivor < ApplicationRecord
   validates :name, :age, presence: true
   validates :latitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
   validates :longitude, numericality: { format: { with: /-?\d{1,6}\.\d{1,3}/ } }
+  after_initialize :normalize_item
   validate :check_items, on: :create
 
   scope :non_infected, -> { where(infected: false) }
   scope :infected, -> { where(infected: true) }
   scope :infected_count, -> { infected.count.to_f }
   scope :non_infected_count, -> { non_infected.count.to_f }
+
+  def normalize_item
+    items.each {|item| item.item = item.item.strip.downcase}
+  end
 
   def self.survivor_percentage(survivor_count)
     total_survivors = count.to_f
@@ -52,13 +57,13 @@ class Survivor < ApplicationRecord
 
   def trade_item(item, survior)
     survior.items.find_or_create_by(item: item.item).increment!(:quantity, item.cache_selling_quantity)
-    items.find_by(item: item.item).update(quantity: item.quantity - item.cache_selling_quantity)
+    item = items.find_by(item: item.item).update!(quantity: item.quantity - item.cache_selling_quantity)
   end
 
   private
 
   def check_items
-    items_hash = items.index_by { |item| item.item.downcase }
+    items_hash = items.index_by { |item| item.item }
     BASIC_ITEMS_NAME.each do |item_name|
       errors.add(:item, "#{item_name} must exist") unless items_hash.key?(item_name)
     end

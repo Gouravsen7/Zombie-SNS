@@ -34,10 +34,10 @@ class TradeItemService < ApplicationService
     survior_items = query_items.map do |qt|
       item = survior_items.find(qt[:item_id])
       points += item.points * qt[:quantity].to_i
-      item.cache_selling_quantity = qt[:quantity].to_i
+      item.cache_selling_quantity = qt[:quantity].to_i || 0
       item
     end
-    survior.cache_trading_items = survior_items
+    survior.cache_trading_items = survior_items || 0
     points
   end
 
@@ -54,6 +54,8 @@ class TradeItemService < ApplicationService
 	    end
 	  rescue ActiveRecord::StatementInvalid => e
 	  	errors.add(:error, "Trader can not perform trading because quantity item not sufficient")
+    rescue ActiveRecord::RecordInvalid => e
+      errors.add(:error, "Trader can not performed! Quantity must be greater than or equal to 1")
 	  end
   end
 

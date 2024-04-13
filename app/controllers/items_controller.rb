@@ -21,6 +21,7 @@ class ItemsController < ApplicationController
 
 
   def survivors_present
+    debugger
     @trade_to = Survivor.find_by_id(params[:trade_to])
     @trade_by = Survivor.find_by_id(params[:trade_by])
     render_unprocessable_entity('Either one of them is not present') unless @trade_to && @trade_to

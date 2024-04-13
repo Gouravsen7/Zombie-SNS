@@ -17,10 +17,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_09_054026) do
   create_table "items", force: :cascade do |t|
     t.string "item"
     t.integer "points"
+    t.integer "quantity"
     t.bigint "survivor_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "quantity"
     t.index ["survivor_id"], name: "index_items_on_survivor_id"
   end
 
